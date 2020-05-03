@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "process.h"
 #include "linux_parser.h"
@@ -18,21 +19,24 @@ Process::Process(int id) : pid_(id){}
 int Process::Pid() { return pid_; }
 
 // Return this process's CPU utilization
-float Process::CpuUtilization() { return LinuxParser::CpuUtilization(Process::Pid()); }
+float Process::CpuUtilization() { 
+    float cpuUtil = (float)LinuxParser::ActiveJiffies(pid_)/(float)LinuxParser::Jiffies();
+    return cpuUtil; 
+}
 
 // Return the command that generated this process
-string Process::Command() { return LinuxParser::Command(Process::Pid()); }
+string Process::Command() { return LinuxParser::Command(pid_); }
 
 // Return this process's memory utilization
-string Process::Ram() { return LinuxParser::Ram(Process::Pid()); }
+string Process::Ram() { return LinuxParser::Ram(pid_); }
 
 // Return the user (name) that generated this process
-string Process::User() { return LinuxParser::User(Process::Pid()); }
+string Process::User() { return LinuxParser::User(pid_); }
 
 // Return the age of this process (in seconds)
-long int Process::UpTime() { return LinuxParser::UpTime(Process::Pid()); }
+long int Process::UpTime() { return LinuxParser::UpTime(pid_); }
 
-// Compares highest Ram values between two Processes
+// Overload the "less than" comparison operator for Process objects
 bool Process::operator<(Process const& a) const { 
   int thisRam = std::stoi(LinuxParser::Ram(pid_));
   int aRam = std::stoi(LinuxParser::Ram(a.pid_));
@@ -42,4 +46,3 @@ bool Process::operator<(Process const& a) const {
   }
   return false; 
 }
-

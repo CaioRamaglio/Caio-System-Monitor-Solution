@@ -1,9 +1,9 @@
+#include <iostream>
 #include <unistd.h>
 #include <cstddef>
 #include <set>
 #include <string>
 #include <vector>
-#include <iostream>
 
 #include "process.h"
 #include "processor.h"
@@ -15,34 +15,23 @@ using std::size_t;
 using std::string;
 using std::vector;
 
-// Constructor
-System::System(){
-  processes_ = System::SetProcesses();
-}
-
 // Return the system's CPU
 Processor& System::Cpu() { return cpu_; }
 
-// Return a container composed of the system's processes
-vector<Process>& System::Processes() { return processes_; }
-
-// Compare helper function
+// Return a container composed of the system's processes sorted by Ram
 bool Compare(const Process a, const Process b){
   return a < b;
 }
 
-// Reads PDIs from the /proc directory and returns a container of Processes
-// sorted by highest Ram values first
-vector<Process> System::SetProcesses() {
-  vector<Process> result;
-  
-  for(int i : LinuxParser::Pids()){
-      Process process(i);
-      result.push_back(process);
-  } 
-  std::sort(result.begin(), result.end(), Compare);
-  
-  return result;
+vector<Process>& System::Processes() { 
+    processes_.clear();
+    for(int i : LinuxParser::Pids()){
+        Process process(i);
+        processes_.push_back(process);
+    }
+
+    std::sort(processes_.begin(), processes_.end(), Compare);
+    return processes_; 
 }
 
 // Return the system's kernel identifier (string)
